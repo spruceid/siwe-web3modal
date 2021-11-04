@@ -68,6 +68,13 @@ export class Client extends EventEmitter {
     }
 
     this.web3Modal = new Web3Modal({ ...this.modalOpts, cacheProvider: true });
+
+    this.web3Modal.on("accountsChanged", (e) =>
+      this.emit("accountsChanged", e)
+    );
+    this.web3Modal.on("chainChanged", (e) => this.emit("chainChanged", e));
+    this.web3Modal.on("connect", (e) => this.emit("connect", e));
+    this.web3Modal.on("disconnect", (e) => this.emit("disconnect", e));
   }
 
   async signOut() {
@@ -76,7 +83,7 @@ export class Client extends EventEmitter {
     this.web3Modal.clearCachedProvider();
 
     Cookies.remove("siwe");
-    this.emit("logout");
+    this.emit("signOut");
   }
 
   async signIn(nonce?: string): Promise<SiweSession> {
@@ -126,7 +133,7 @@ export class Client extends EventEmitter {
           expires: expirationTime,
         });
 
-        this.emit("login", session);
+        this.emit("signIn", session);
 
         resolve(session);
       } catch (e) {
