@@ -151,10 +151,14 @@ export class Client extends EventEmitter {
     }
 
     try {
-      this.session.message = await this.session.message.validate(this.provider);
-      this.emit("validate", this.session);
+      if (this.session) {
+        this.session.message = await this.session.message.validate(
+          this.provider
+        );
+      }
+      this.emit("validate", { session: this.session, error: null });
     } catch (e) {
-      this.emit("validate", e);
+      this.emit("validate", { session: null, error: e });
     }
   }
 
