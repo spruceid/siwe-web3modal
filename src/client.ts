@@ -9,7 +9,7 @@ import Web3Modal from "web3modal";
 export interface SiweSession {
   message: SiweMessage;
   signature: string;
-  pubkey: string;
+  address: string;
   ens?: string;
   ensAvatar?: string;
 }
@@ -56,12 +56,12 @@ export class Client extends EventEmitter {
 
     const sessionCookie = Cookies.get("siwe");
     if (sessionCookie) {
-      const { message, signature, pubkey, ens, ensAvatar } =
+      const { message, signature, address, ens, ensAvatar } =
         JSON.parse(sessionCookie);
       this.session = {
         message: new SiweMessage(message),
         signature,
-        pubkey,
+        address,
         ens,
         ensAvatar,
       };
@@ -90,13 +90,13 @@ export class Client extends EventEmitter {
         const accounts = await this.provider.listAccounts();
 
         // MetaMask does not give you all accounts, only the selected account
-        const pubkey = accounts[0]?.toLowerCase();
-        if (!pubkey) {
+        const address = accounts[0]?.toLowerCase();
+        if (!address) {
           throw new Error("Address not found");
         }
-        const ens = await this.provider.lookupAddress(pubkey);
+        const ens = await this.provider.lookupAddress(address);
 
-        const ensAvatar = ens && (await this.provider.getAvatar(ens));
+        const ensAvatar = await this.provider.getAvatar(address);
 
         const expirationTime = new Date(
           new Date().getTime() + this.sessionOpts.expiration
@@ -104,7 +104,7 @@ export class Client extends EventEmitter {
 
         const message = new SiweMessage({
           domain: this.sessionOpts.domain,
-          address: pubkey,
+          address: address,
           expirationTime: expirationTime.toISOString(),
           uri: this.sessionOpts.uri,
           version: this.sessionOpts.version,
@@ -118,7 +118,7 @@ export class Client extends EventEmitter {
         const session: SiweSession = {
           message: new SiweMessage(message),
           signature,
-          pubkey,
+          address,
           ens,
           ensAvatar,
         };
