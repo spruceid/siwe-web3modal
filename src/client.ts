@@ -9,7 +9,6 @@ import Web3Modal from "web3modal";
 export interface SiweSession {
   message: SiweMessage;
   signature: string;
-  address: string;
   ens?: string;
   ensAvatar?: string;
 }
@@ -56,12 +55,10 @@ export class Client extends EventEmitter {
 
     const sessionCookie = Cookies.get("siwe");
     if (sessionCookie) {
-      const { message, signature, address, ens, ensAvatar } =
-        JSON.parse(sessionCookie);
+      const { message, signature, ens, ensAvatar } = JSON.parse(sessionCookie);
       this.session = {
         message: new SiweMessage(message),
         signature,
-        address,
         ens,
         ensAvatar,
       };
@@ -109,9 +106,12 @@ export class Client extends EventEmitter {
           new Date().getTime() + this.sessionOpts.expiration
         );
 
-        const message = new SiweMessage({
+        const signMessage = new SiweMessage({
           domain: this.sessionOpts.domain,
           address: address,
+          chainId: `${await this.provider
+            .getNetwork()
+            .then(({ chainId }) => chainId)}`,
           expirationTime: expirationTime.toISOString(),
           uri: this.sessionOpts.uri,
           version: this.sessionOpts.version,
@@ -120,12 +120,14 @@ export class Client extends EventEmitter {
           nonce,
         }).signMessage();
 
-        const signature = await this.provider.getSigner().signMessage(message);
-
+        const signature = await this.provider
+          .getSigner()
+          .signMessage(signMessage);
+        const message = new SiweMessage(signMessage);
+        message.signature = signature;
         const session: SiweSession = {
-          message: new SiweMessage(message),
+          message,
           signature,
-          address,
           ens,
           ensAvatar,
         };
@@ -144,10 +146,13 @@ export class Client extends EventEmitter {
   }
 
   async valitate() {
-    await this.initializeProvider();
+    if (this.session) {
+      await this.initializeProvider();
+    }
 
     try {
-      this.emit("validate", await this.session.message.validate(this.provider));
+      this.session.message = await this.session.message.validate(this.provider);
+      this.emit("validate", this.session);
     } catch (e) {
       this.emit("validate", e);
     }
