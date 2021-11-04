@@ -1,0 +1,37 @@
+{
+  "name": "siwe-web3modal",
+  "version": "0.0.1",
+  "description": "Web3Modal SIWE wrapper",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "jest",
+    "build": "npm run clean && webpack",
+    "clean": "shx rm -rf _bundles lib lib-esm"
+  },
+  "author": "Spruce Systems Inc.",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@babel/core": "^7.16.0",
+    "@babel/preset-env": "^7.16.0",
+    "@types/react": "^17.0.30",
+    "awesome-typescript-loader": "^5.2.1",
+    "shx": "^0.3.3",
+    "webpack-cli": "^4.9.1",
+    "webpack": "^5.61.0"
+  },
+  "dependencies": {
+    "@ensdomains/ensjs": "^2.0.1",
+    "@metamask/eth-sig-util": "^4.0.0",
+    "@types/js-cookie": "^3.0.0",
+    "ethers": "^5.5.1",
+    "events": "^3.3.0",
+    "js-cookie": "^3.0.1",
+    "siwe": "file:../siwe",
+    "web3": "^1.6.0",
+    "web3modal": "^1.9.4"
+  }
+}
