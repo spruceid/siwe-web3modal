@@ -1,6 +1,6 @@
 {
   "name": "@spruceid/siwe-web3modal",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Web3Modal SIWE wrapper",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
