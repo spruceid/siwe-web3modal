@@ -98,9 +98,17 @@ export class Client extends EventEmitter {
         if (!address) {
           throw new Error("Address not found");
         }
+
         const ens = await this.provider.lookupAddress(address);
 
-        const ensAvatar = await this.provider.getAvatar(address);
+        const network =
+          this.provider.network.name === "homestead"
+            ? "mainnet"
+            : this.provider.network.name;
+
+        const ensAvatar = ens
+          ? `https://metadata.ens.domains/${network}/avatar/${ens}`
+          : null;
 
         const expirationTime = new Date(
           new Date().getTime() + this.sessionOpts.expiration
@@ -145,7 +153,7 @@ export class Client extends EventEmitter {
     });
   }
 
-  async valitate() {
+  async validate() {
     if (this.session) {
       await this.initializeProvider();
     }
