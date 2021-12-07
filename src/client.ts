@@ -94,7 +94,7 @@ export class Client extends EventEmitter {
         const accounts = await this.provider.listAccounts();
 
         // MetaMask does not give you all accounts, only the selected account
-        const address = accounts[0]?.toLowerCase();
+        const [address] = accounts;
         if (!address) {
           throw new Error("Address not found");
         }
