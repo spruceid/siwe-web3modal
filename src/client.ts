@@ -8,6 +8,7 @@ import Web3Modal from "web3modal";
 
 export interface SiweSession {
   message: SiweMessage;
+  raw: string,
   signature: string;
   ens?: string;
   ensAvatar?: string;
@@ -43,21 +44,24 @@ export class Client extends EventEmitter {
     this.session = opts?.currentSession;
     this.sessionOpts = opts.session;
 
-    const sanity =
-      this.sessionOpts?.expiration &&
-      typeof this.sessionOpts.expiration === "number" &&
-      this.sessionOpts.expiration > 0;
+    if (this.sessionOpts.expiration) {
+      const sanity =
+        typeof this.sessionOpts.expiration === "number" &&
+        this.sessionOpts.expiration > 0;
 
-    if (!sanity) {
-      // Default to 48 hours.
-      this.sessionOpts.expiration = 2 * 24 * 60 * 60 * 1000;
+      if (!sanity) {
+        // Default to 48 hours.
+        this.sessionOpts.expiration = 2 * 24 * 60 * 60 * 1000;
+      }
     }
+    
 
     const sessionCookie = Cookies.get("siwe");
     if (sessionCookie) {
       const { message, signature, ens, ensAvatar } = JSON.parse(sessionCookie);
       this.session = {
         message: new SiweMessage(message),
+        raw: message,
         signature,
         ens,
         ensAvatar,
@@ -135,6 +139,7 @@ export class Client extends EventEmitter {
         message.signature = signature;
         const session: SiweSession = {
           message,
+          raw: signMessage,
           signature,
           ens,
           ensAvatar,
