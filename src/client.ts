@@ -21,6 +21,7 @@ export interface SessionOpts {
   // Defaults to 48 hours.
   expiration?: number;
   statement?: string;
+  resources?: Array<string>;
 }
 
 export interface ClientOpts {
@@ -117,15 +118,16 @@ export class Client extends EventEmitter {
         const signMessage = new SiweMessage({
           domain: this.sessionOpts.domain,
           address: address,
-          chainId: `${await this.provider
+          chainId: await this.provider
             .getNetwork()
-            .then(({ chainId }) => chainId)}`,
+            .then(({ chainId }) => chainId),
           expirationTime: expirationTime.toISOString(),
           uri: this.sessionOpts.uri,
           version: this.sessionOpts.version,
           statement: this.sessionOpts.statement,
           type: SignatureType.PERSONAL_SIGNATURE,
           nonce,
+          resources: this.sessionOpts.resources,
         }).signMessage();
 
         const signature = await this.provider
@@ -161,6 +163,7 @@ export class Client extends EventEmitter {
     try {
       if (this.session) {
         this.session.message = await this.session.message.validate(
+          this.session.signature,
           this.provider
         );
       }
