@@ -2,7 +2,7 @@
 import { ethers } from "ethers";
 import EventEmitter from "events";
 import Cookies from "js-cookie";
-import { SignatureType, SiweMessage } from "siwe";
+import { SiweMessage } from "siwe";
 import type { ICoreOptions } from "web3modal";
 import Web3Modal from "web3modal";
 
@@ -55,7 +55,7 @@ export class Client extends EventEmitter {
         this.sessionOpts.expiration = 2 * 24 * 60 * 60 * 1000;
       }
     }
-    
+
 
     const sessionCookie = Cookies.get("siwe");
     if (sessionCookie) {
@@ -129,16 +129,14 @@ export class Client extends EventEmitter {
           uri: this.sessionOpts.uri,
           version: this.sessionOpts.version,
           statement: this.sessionOpts.statement,
-          type: SignatureType.PERSONAL_SIGNATURE,
           nonce,
           resources: this.sessionOpts.resources,
-        }).signMessage();
+        }).prepareMessage();
 
         const signature = await this.provider
           .getSigner()
           .signMessage(signMessage);
         const message = new SiweMessage(signMessage);
-        message.signature = signature;
         const session: SiweSession = {
           message,
           raw: signMessage,
