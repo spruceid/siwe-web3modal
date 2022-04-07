@@ -45,15 +45,13 @@ export class Client extends EventEmitter {
     this.session = opts?.currentSession;
     this.sessionOpts = opts.session;
 
-    if (this.sessionOpts.expiration) {
-      const sanity =
-        typeof this.sessionOpts.expiration === "number" &&
-        this.sessionOpts.expiration > 0;
+    const sanity =
+      typeof this.sessionOpts?.expiration === "number" &&
+      this.sessionOpts?.expiration > 0;
 
-      if (!sanity) {
-        // Default to 48 hours.
-        this.sessionOpts.expiration = 2 * 24 * 60 * 60 * 1000;
-      }
+    if (!sanity) {
+      // Default to 48 hours.
+      this.sessionOpts.expiration = 2 * 24 * 60 * 60 * 1000;
     }
 
 
