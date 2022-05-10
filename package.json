@@ -1,6 +1,6 @@
 {
     "name": "@spruceid/siwe-web3modal",
-    "version": "0.1.6",
+    "version": "1.0.0",
     "description": "Web3Modal SIWE wrapper",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
@@ -28,7 +28,7 @@
         "ethers": "^5.5.1",
         "events": "^3.3.0",
         "js-cookie": "^3.0.1",
-        "siwe": "1.1.6",
+        "siwe": "2.0.2",
         "web3": "^1.6.0",
         "web3modal": "^1.9.4"
     }

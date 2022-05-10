@@ -161,19 +161,19 @@ export class Client extends EventEmitter {
   async validate() {
     if (this.session) {
       await this.initializeProvider();
+    } else {
+      return;
     }
 
-    try {
-      if (this.session) {
-        this.session.message = await this.session.message.validate(
-          this.session.signature,
-          this.provider
-        );
-      }
-      this.emit("validate", { session: this.session, error: null });
-    } catch (e) {
-      this.emit("validate", { session: null, error: e });
-    }
+    const result = await this.session.message.verify(
+      {
+        signature: this.session.signature,
+        domain: this.sessionOpts.domain,
+      },
+      this.provider
+    );
+    this.session.message = result.data;
+    this.emit("validate", { session: this.session, error: result.error });
   }
 
   async initializeProvider(): Promise<ethers.providers.JsonRpcProvider> {
