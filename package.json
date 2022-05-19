@@ -9,8 +9,7 @@
     },
     "scripts": {
         "test": "jest",
-        "build": "npm run clean && webpack",
-        "clean": "shx rm -rf _bundles lib lib-esm"
+        "build": "tsc"
     },
     "author": "Spruce Systems Inc.",
     "license": "Apache-2.0",
