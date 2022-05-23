@@ -8,7 +8,7 @@ import Web3Modal from "web3modal";
 
 export interface SiweSession {
   message: SiweMessage;
-  raw: string,
+  raw: string;
   signature: string;
   ens?: string;
   ensAvatar?: string;
@@ -53,7 +53,6 @@ export class Client extends EventEmitter {
       // Default to 48 hours.
       this.sessionOpts.expiration = 2 * 24 * 60 * 60 * 1000;
     }
-
 
     const sessionCookie = Cookies.get("siwe");
     if (sessionCookie) {
@@ -159,19 +158,19 @@ export class Client extends EventEmitter {
   async validate() {
     if (this.session) {
       await this.initializeProvider();
+    } else {
+      return;
     }
 
-    try {
-      if (this.session) {
-        this.session.message = await this.session.message.validate(
-          this.session.signature,
-          this.provider
-        );
-      }
-      this.emit("validate", { session: this.session, error: null });
-    } catch (e) {
-      this.emit("validate", { session: null, error: e });
-    }
+    const result = await this.session.message.verify(
+      {
+        signature: this.session.signature,
+        domain: this.sessionOpts.domain,
+      },
+      { provider: this.provider }
+    );
+    this.session.message = result.data;
+    this.emit("validate", { session: this.session, error: result.error });
   }
 
   async initializeProvider(): Promise<ethers.providers.JsonRpcProvider> {
