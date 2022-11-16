@@ -87,6 +87,7 @@ export class Client extends EventEmitter {
 
   async signIn(nonce?: string): Promise<SiweSession> {
     return new Promise(async (resolve, reject) => {
+      let address;
       try {
         await this.initializeProvider();
 
@@ -96,26 +97,31 @@ export class Client extends EventEmitter {
         const accounts = await this.provider.listAccounts();
 
         // MetaMask does not give you all accounts, only the selected account
-        const [address] = accounts;
-        if (!address) {
+        const [_address] = accounts;
+        if (!_address) {
           throw new Error("Address not found");
         }
+        address = _address;
+      } catch (e) {
+        this.signOut();
+        reject(e);
+        return;
+      }
 
-        const ens = await this.provider.lookupAddress(address);
+      let ens, ensAvatar;
+      try {
+        ens = await this.provider.lookupAddress(address);
+      } catch { }
 
-        const network =
-          this.provider.network.name === "homestead"
-            ? "mainnet"
-            : this.provider.network.name;
+      if(ens) {
+        ensAvatar = `https://metadata.ens.domains/${this.provider.network.name}/avatar/${ens}`;
+      }
 
-        const ensAvatar = ens
-          ? `https://metadata.ens.domains/${network}/avatar/${ens}`
-          : null;
-
+      try {
         const expirationTime = new Date(
           new Date().getTime() + this.sessionOpts.expiration
         );
-
+  
         const signMessage = new SiweMessage({
           domain: this.sessionOpts.domain,
           address: address,
@@ -129,7 +135,7 @@ export class Client extends EventEmitter {
           nonce,
           resources: this.sessionOpts.resources,
         }).prepareMessage();
-
+  
         const signature = await this.provider
           .getSigner()
           .signMessage(signMessage);
@@ -144,13 +150,15 @@ export class Client extends EventEmitter {
         Cookies.set("siwe", JSON.stringify(session), {
           expires: expirationTime,
         });
-
+  
         this.emit("signIn", session);
-
+  
         resolve(session);
+        return;
       } catch (e) {
         this.signOut();
         reject(e);
+        return;
       }
     });
   }
